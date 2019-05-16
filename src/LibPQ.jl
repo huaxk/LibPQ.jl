@@ -1,7 +1,8 @@
 module LibPQ
 
 export status, reset!, execute, prepare,
-    num_columns, num_rows, num_params, num_affected_rows
+    num_columns, num_rows, num_params, num_affected_rows,
+    register
 
 using Dates
 using DocStringExtensions
@@ -1220,5 +1221,6 @@ end
 include("parsing.jl")
 include("copy.jl")
 include("tables.jl")
+include("register.jl")
 
 end
