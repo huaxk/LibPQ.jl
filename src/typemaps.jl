@@ -191,6 +191,7 @@ Base.iterate(tmap::PQTypeMap, i) = iterate(tmap.type_map, i)
 
 Base.length(tmap::PQTypeMap) = length(tmap.type_map)
 Base.keys(tmap::PQTypeMap) = keys(tmap.type_map)
+Base.get(tm::PQTypeMap, key, default) = get(tm.type_map, key, default)
 
 """
     const _DEFAULT_TYPE_MAP::PQTypeMap
