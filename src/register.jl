@@ -9,11 +9,11 @@ function getTypeOid(conn::LibPQ.Connection, typname::Symbol)
     isempty(data.oid) ? nothing : data.oid[1]
 end
 
-"""
-    registerType(typname::Symbol, oid::LibPQ.Oid, type::Type)
-Register database typname, oid and julia type into LibPQ.
-"""
-function registerType(typname::Symbol, oid::LibPQ.Oid, type::Type)
+# """
+#     registerType(typname::Symbol, oid::LibPQ.Oid, type::Type)
+# Register database typname, oid and julia type into LibPQ.
+# """
+# function registerType(typname::Symbol, oid::LibPQ.Oid, type::Type)
     # _oid = get(LibPQ.PQ_SYSTEM_TYPES, typname, nothing)
     # if _oid == nothing
     #     LibPQ.PQ_SYSTEM_TYPES[typname] = oid
@@ -23,17 +23,17 @@ function registerType(typname::Symbol, oid::LibPQ.Oid, type::Type)
     #     @info "typname: $typname already register."
     # end
 
-    _type = get(LibPQ.LIBPQ_TYPE_MAP, oid, nothing)
-    if _type == nothing
-        LibPQ.LIBPQ_TYPE_MAP[oid] = type
-    elseif _type != type
-        error("type: $type already register and type:$_type is not same type:$type.")
-    else
-        @info "type: $type already register."
-    end
+    # _type = get(LibPQ.LIBPQ_TYPE_MAP, oid, nothing)
+    # if _type == nothing
+    #     LibPQ.LIBPQ_TYPE_MAP[oid] = type
+    # elseif _type != type
+    #     error("type: $type already register and type:$_type is not same type:$type.")
+    # else
+    #     @info "type: $type already register."
+    # end
 
-    nothing
-end
+#     nothing
+# end
 
 """
     register(conn::LibPQ.Connection, typname::Symbol, type::Type, func_from::Function, func_to::Function)
@@ -58,11 +58,21 @@ function register(conn::LibPQ.Connection, typname::Symbol, type::Type, func_from
     oid = getTypeOid(conn, typname)
     oid == nothing && error("database is not support type: $typname")
 
-    registerType(typname, oid, type)
+    # registerType(typname, oid, type)
+    _type = get(LibPQ.LIBPQ_TYPE_MAP, oid, nothing)
+    if _type == nothing
+        LibPQ.LIBPQ_TYPE_MAP[oid] = type
+    elseif _type != type
+        error("type: $type already register and type:$_type is not same type:$type.")
+    else
+        @info "type: $type already register."
+    end
 
-    @eval function Base.parse(::Type{$type}, pqv::PQValue{$oid})
-              $func_from(pqv)
-          end
+    LibPQ.LIBPQ_CONVERSIONS[(oid, type)] = func_from
+
+    # @eval function Base.parse(::Type{$type}, pqv::PQValue{$oid})
+    #     $func_from(pqv)
+    # end
 
     @eval function Base.string(obj::$type)
         $func_to(obj)
